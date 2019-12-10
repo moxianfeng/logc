@@ -53,3 +53,6 @@ dkms.conf
 
 # log file
 *.log
+
+# automake dependent directory
+.deps/
