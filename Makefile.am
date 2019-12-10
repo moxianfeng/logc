@@ -1,2 +1,6 @@
-bin_PROGRAMS=logc
-logc_SOURCES=logc.c
+lib_LTLIBRARIES=liblogc.la
+liblogc_la_SOURCES=logc.h logc.c
+#liblogc_la_LDFLAGS=-shared -fpic
+include_HEADERS=logc.h
+
+ACLOCAL_AMFLAGS=-I m4

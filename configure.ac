@@ -7,6 +7,10 @@ AM_INIT_AUTOMAKE #1
 AC_CONFIG_SRCDIR([logc.c])
 AC_CONFIG_HEADERS([config.h])
 
+AC_PROG_LIBTOOL
+
+AC_PROG_LIBTOOL
+
 # Checks for programs.
 AC_PROG_CC
 
