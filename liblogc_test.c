@@ -13,7 +13,7 @@ main()
     logc_set_rotate(logger, 10, 500);
 
     for ( i = 0;i < 505;i++ ) {
-        logc_log(logger, LOG_DEBUG, "%04d, lksjfldsfj", i);
+        logc_error(logger, "%04d, lksjfldsfj", i);
     }
     logc_free(logger);
     return 0;

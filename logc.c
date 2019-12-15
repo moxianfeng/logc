@@ -23,9 +23,10 @@
 #define DEFAULT_TIME_FORMAT
 #define DEFAULT_LEVEL_FORMAT
 
-const char *_LEVEL_STRING [3] = {
+const char *_LEVEL_STRING [4] = {
     "DEBUG",
     "INFO",
+    "WORN",
     "ERROR",
 };
 
@@ -115,6 +116,18 @@ void logc_free(struct logc *logger) {
         logger->buffer[i] = NULL;
     }
     free(logger);
+}
+
+void logc_set_date_formatter(struct logc *logger, date_formatter_t formatter) {
+    logger->date_formatter = formatter;
+}
+
+void logc_set_time_formatter(struct logc *logger, time_formatter_t formatter) {
+    logger->time_formatter = formatter;
+}
+
+void logc_set_level_formatter(struct logc *logger, level_formatter_t formatter) {
+    logger->level_formatter = formatter;
 }
 
 void logc_log(struct logc *logger, LOGC_LOG_LEVEL level, const char *fmt, ...) {
