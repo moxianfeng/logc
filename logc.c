@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <sys/uio.h>
 #include <unistd.h>
+#include <string.h>
 #include <sys/syslimits.h>
 #include <sys/errno.h>
 
