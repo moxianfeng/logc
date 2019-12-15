@@ -15,8 +15,10 @@ AC_PROG_LIBTOOL
 AC_PROG_CC
 
 # Checks for libraries.
+#AC_CHECK_LIB([])
 
 # Checks for header files.
+
 
 # Checks for typedefs, structures, and compiler characteristics.
 

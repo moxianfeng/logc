@@ -6,4 +6,5 @@ ACLOCAL_AMFLAGS=-I m4
 
 check_PROGRAMS=liblogc_test
 liblogc_test_SOURCES=liblogc_test.c
-liblogc_test_LDADD = $(top_builddir)/liblogc.la
+liblogc_test_LDADD=$(top_builddir)/liblogc.la
+liblogc_test_LDFLAGS=-static
