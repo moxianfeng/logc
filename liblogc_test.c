@@ -31,7 +31,7 @@ main()
 
     for ( i = 0;i < 100;i++ ) {
         logc_error(logger, "%04d, lksjfldsfj", i);
-        logc_log_binary(logger, LOG_DEBUG, data, data_size, "%04d, random binary data:", i);
+        logc_debug_binary(logger, data, data_size, "%04d, random binary data:", i);
     }
     logc_free(logger);
     return 0;

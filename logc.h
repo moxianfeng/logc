@@ -18,9 +18,19 @@ extern "C" {
 #define logc_warn(logger, fmt, ...) logc_log(logger, LOG_WORN, fmt, ##__VA_ARGS__)
 #define logc_error(logger, fmt, ...) logc_log(logger, LOG_ERROR, fmt, ##__VA_ARGS__)
 #define logc_vdebug(logger, fmt, ap) logc_vlog(logger, LOG_DEBUG, fmt, ap)
-#define logc_vinfo(logger, fmt, ...) logc_vlog(logger, LOG_INFO, fmt, ap)
-#define logc_vwarn(logger, fmt, ...) logc_vlog(logger, LOG_WORN, fmt, ap)
-#define logc_verror(logger, fmt, ...) logc_vlog(logger, LOG_ERROR, fmt, ap)
+#define logc_vinfo(logger, fmt, ap) logc_vlog(logger, LOG_INFO, fmt, ap)
+#define logc_vwarn(logger, fmt, ap) logc_vlog(logger, LOG_WORN, fmt, ap)
+#define logc_verror(logger, fmt, ap) logc_vlog(logger, LOG_ERROR, fmt, ap)
+
+#define logc_debug_binary(logger, data, data_size, fmt, ...) logc_binary(logger, LOG_DEBUG, data, data_size, fmt, ##__VA_ARGS__)
+#define logc_info_binary(logger, data, data_size, fmt, ...) logc_binary(logger, LOG_INFO, data, data_size, fmt, ##__VA_ARGS__)
+#define logc_warn_binary(logger, data, data_size, fmt, ...) logc_binary(logger, LOG_WORN, data, data_size, fmt, ##__VA_ARGS__)
+#define logc_error_binary(logger, data, data_size, fmt, ...) logc_binary(logger, LOG_ERROR, data, data_size, fmt, ##__VA_ARGS__)
+#define logc_vdebug_binary(logger, data, data_size, fmt, ap) logc_vbinary(logger, LOG_DEBUGdata, data_size, , fmt, ap)
+#define logc_vinfo_binary(logger, data, data_size, fmt, ap) logc_vbinary(logger, LOG_INFO, data, data_size, fmt, ap)
+#define logc_vwarn_binary(logger, data, data_size, fmt, ap) logc_vbinary(logger, LOG_WORN, data, data_size, fmt, ap)
+#define logc_verror_binary(logger, data, data_size, fmt, ap) logc_vbinary(logger, LOG_ERROR, data, data_size, fmt, ap)
+
 
 struct logc;
 typedef enum {
@@ -56,8 +66,8 @@ void logc_set_binary_maxsize(struct logc *logger, size_t siz);
 void logc_log(struct logc *logger, LOGC_LOG_LEVEL level, const char *fmt, ...);
 void logc_vlog(struct logc *logger, LOGC_LOG_LEVEL level, const char *fmt, va_list ap);
 
-void logc_log_binary(struct logc *logger, LOGC_LOG_LEVEL level, const char *data, size_t data_size, const char *fmt, ...);
-void logc_vlog_binary(struct logc *logger, LOGC_LOG_LEVEL level, const char *data, size_t data_size, const char *fmt, va_list ap);
+void logc_binary(struct logc *logger, LOGC_LOG_LEVEL level, const char *data, size_t data_size, const char *fmt, ...);
+void logc_vbinary(struct logc *logger, LOGC_LOG_LEVEL level, const char *data, size_t data_size, const char *fmt, va_list ap);
 
 
 #ifdef __cplusplus

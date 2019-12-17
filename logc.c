@@ -268,7 +268,7 @@ void _do_rotate(struct logc *logger) {
 }
 
 void logc_vlog(struct logc *logger, LOGC_LOG_LEVEL level, const char *fmt, va_list ap) {
-    logc_vlog_binary(logger, level, NULL, 0, fmt, ap);
+    logc_vbinary(logger, level, NULL, 0, fmt, ap);
 }
 
 void logc_set_rotate(struct logc *logger, int rotate_count, ssize_t rotate_size) {
@@ -287,14 +287,14 @@ void logc_set_binary_maxsize(struct logc *logger, size_t siz) {
     logger->binary_buffer = malloc(logger->binary_buffer_size);
 }
 
-void logc_log_binary(struct logc *logger, LOGC_LOG_LEVEL level, const char *data, size_t data_size, const char *fmt, ...) {
+void logc_binary(struct logc *logger, LOGC_LOG_LEVEL level, const char *data, size_t data_size, const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
-    logc_vlog_binary(logger, level, data, data_size, fmt, ap);
+    logc_vbinary(logger, level, data, data_size, fmt, ap);
     va_end(ap);
 }
 
-void logc_vlog_binary(struct logc *logger, LOGC_LOG_LEVEL level, const char *data, size_t data_size, const char *fmt, va_list ap) {
+void logc_vbinary(struct logc *logger, LOGC_LOG_LEVEL level, const char *data, size_t data_size, const char *fmt, va_list ap) {
     struct iovec *vec;
     int vec_count = 0;
     struct timeval tv;
