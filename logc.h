@@ -38,6 +38,7 @@ typedef struct {
 typedef formatter_result_t (*date_formatter_t)(const struct timeval *now, char *buf, size_t buf_size);
 typedef formatter_result_t (*time_formatter_t)(const struct timeval *now, char *buf, size_t buf_size);
 typedef formatter_result_t (*level_formatter_t)(LOGC_LOG_LEVEL level, char *buf, size_t buf_size);
+typedef formatter_result_t (*binary_formatter_t)(size_t max_print_size, const char *data, size_t data_size, char *buf, size_t buf_zie);
 
 struct logc *logc_init(const char *filename, int mode);
 void logc_free(struct logc *logger);
@@ -46,9 +47,17 @@ void logc_set_rotate(struct logc *logger, int rotate_count, ssize_t rotate_size)
 void logc_set_date_formatter(struct logc *logger, date_formatter_t formatter);
 void logc_set_time_formatter(struct logc *logger, time_formatter_t formatter);
 void logc_set_level_formatter(struct logc *logger, level_formatter_t formatter);
+/**
+ * default max of binary data size is 1024
+ * and default one byte buffer size is defined by macro BINARY_BYTES_PER_BYTE(16), you can change it by recompile logc library
+ **/
+void logc_set_binary_maxsize(struct logc *logger, size_t siz);
 
 void logc_log(struct logc *logger, LOGC_LOG_LEVEL level, const char *fmt, ...);
 void logc_vlog(struct logc *logger, LOGC_LOG_LEVEL level, const char *fmt, va_list ap);
+
+void logc_log_binary(struct logc *logger, LOGC_LOG_LEVEL level, const char *data, size_t data_size, const char *fmt, ...);
+void logc_vlog_binary(struct logc *logger, LOGC_LOG_LEVEL level, const char *data, size_t data_size, const char *fmt, va_list ap);
 
 
 #ifdef __cplusplus

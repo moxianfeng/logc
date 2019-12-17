@@ -20,9 +20,18 @@
 
 #define VERIFY(var) do {if (!(var)) abort();} while(0)
 
-#define DEFAULT_DATE_FORMAT
-#define DEFAULT_TIME_FORMAT
-#define DEFAULT_LEVEL_FORMAT
+#ifndef DEFAULT_BINARY_MAXSIZE
+#define DEFAULT_BINARY_MAXSIZE 1024
+#endif // DEFAULT_BINARY_MAXSIZE
+
+#ifndef BINARY_BUFFER_BYTES_PER_BYTE
+#define BINARY_BUFFER_BYTES_PER_BYTE 16
+#endif // BINARY_BUFFER_BYTES_PER_BYTE
+
+#ifndef BINARY_BYTES_PER_LINE
+#define BINARY_BYTES_PER_LINE 32
+#endif // BINARY_BYTES_PER_LINE
+
 
 const char *_LEVEL_STRING [4] = {
     "DEBUG",
@@ -41,10 +50,15 @@ struct logc {
     ssize_t total;
     ssize_t rotate_size;
     uint32_t rotate_count;
+    size_t binary_maxsize;
+
+    char *binary_buffer;
+    size_t binary_buffer_size;
 
     date_formatter_t date_formatter;
     time_formatter_t time_formatter;
     level_formatter_t level_formatter;
+    binary_formatter_t binary_formatter;
 };
 
 formatter_result_t _default_level_formatter(LOGC_LOG_LEVEL level, char *buf, size_t buf_size) {
@@ -71,6 +85,79 @@ formatter_result_t _default_time_formatter(const struct timeval *now, char *buf,
         result.buffer_size += 1;
     }
     result.buffer[result.buffer_size] = 0;
+    return result;
+}
+
+int _default_binary_format_line(size_t lineno, const char *data, size_t data_size, char *buffer, size_t buffer_size) {
+    int ret = 0;
+    size_t i;
+    int offset = 0;
+
+    // `0000 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16  ................\n`
+    size_t line_size = 4 + 3 * BINARY_BYTES_PER_LINE + 2 + BINARY_BYTES_PER_LINE + 1;
+
+    // is the buffer enough for one line
+    if ( buffer_size - offset < line_size ) {
+        return 0;
+    }
+
+    // `0000 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16  ................\n`
+    ret = snprintf(buffer + offset, buffer_size - offset, "%04lu", lineno);
+    offset += ret;
+
+    for ( i = 0;i < BINARY_BYTES_PER_LINE;i++ ) {
+        unsigned char c = *(unsigned char *)(data + i);
+        ret = snprintf(buffer + offset, buffer_size - offset, " %02x", c);
+        offset += ret;
+
+        if ( c >= 32 && c <= 126 ) {
+            buffer[4 + 3 * BINARY_BYTES_PER_LINE + 2 + i] = c;
+        } else {
+            buffer[4 + 3 * BINARY_BYTES_PER_LINE + 2 + i] = '.';
+        }
+    }
+    // `0000 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16  ................\n`
+    //                                                      ^^
+    buffer[4 + 3 * BINARY_BYTES_PER_LINE] = ' ';
+    buffer[4 + 3 * BINARY_BYTES_PER_LINE + 1] = ' ';
+    buffer[line_size - 1] = '\n';
+    return line_size;
+}
+
+formatter_result_t _default_binary_formmater(size_t max_print_size, const char *data, size_t data_size, char *buffer, size_t buffer_size) {
+    size_t i, buffer_offset = 0;
+    int ret, j;
+    formatter_result_t result = {buffer, 0};
+
+    // `     01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16\n`
+    size_t head_size = 4 + 3 * BINARY_BYTES_PER_LINE + 1;
+
+    if ( buffer_size - buffer_offset < head_size ) {
+        goto final_return;
+    }
+    // print column head
+    // 0000 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16
+    ret = snprintf(buffer + buffer_offset, buffer_size - buffer_offset, "%4s", " ");
+    buffer_offset += ret;
+
+    for ( i = 0;i < BINARY_BYTES_PER_LINE;i++ ) {
+        ret = snprintf(buffer + buffer_offset, buffer_size - buffer_offset, " %02lu", i);
+        buffer_offset += ret;
+    }
+    *(buffer + buffer_offset) = '\n';
+    buffer_offset += 1;
+
+    for ( i = 0;i < data_size && i < max_print_size;i+=BINARY_BYTES_PER_LINE ) {
+        ret = _default_binary_format_line(i/BINARY_BYTES_PER_LINE, data + i, data_size - i, buffer + buffer_offset, buffer_size - buffer_offset);
+        if ( ret == 0 ) {
+            // buffer not enough
+            break;
+        }
+        buffer_offset += ret;
+    }
+
+final_return:
+    result.buffer_size = buffer_offset;
     return result;
 }
 
@@ -101,12 +188,18 @@ struct logc *logc_init(const char *filename, int mode) {
     }
     logger->rotate_count = 0;
     logger->rotate_size = 0;
+    logger->binary_maxsize = DEFAULT_BINARY_MAXSIZE;
     for ( i = 0;i < sizeof(logger->buffer)/sizeof(char *);i++) {
         VERIFY(logger->buffer[i] = malloc(BUFFER_SIZE));
     }
     logger->date_formatter = _default_date_formatter;
     logger->time_formatter = _default_time_formatter;
     logger->level_formatter = _default_level_formatter;
+    logger->binary_formatter = _default_binary_formmater;
+
+    logger->binary_buffer_size = logger->binary_maxsize * BINARY_BUFFER_BYTES_PER_BYTE;
+    logger->binary_buffer = (char *)malloc(logger->binary_buffer_size);
+
     return logger;
 }
 
@@ -115,6 +208,10 @@ void logc_free(struct logc *logger) {
     for ( i = 0;i < sizeof(logger->buffer)/sizeof(char *);i++) {
         free(logger->buffer[i]);
         logger->buffer[i] = NULL;
+    }
+    if ( logger->binary_buffer ) {
+        free(logger->binary_buffer);
+        logger->binary_buffer = NULL;
     }
     free(logger);
 }
@@ -171,10 +268,49 @@ void _do_rotate(struct logc *logger) {
 }
 
 void logc_vlog(struct logc *logger, LOGC_LOG_LEVEL level, const char *fmt, va_list ap) {
-    struct iovec vec[BUFFER_COUNT + 1];
+    logc_vlog_binary(logger, level, NULL, 0, fmt, ap);
+}
+
+void logc_set_rotate(struct logc *logger, int rotate_count, ssize_t rotate_size) {
+    logger->rotate_count = rotate_count;
+    logger->rotate_size = rotate_size;
+}
+
+void logc_set_binary_maxsize(struct logc *logger, size_t siz) {
+    logger->binary_maxsize = siz;
+
+    logger->binary_buffer_size = logger->binary_maxsize * BINARY_BUFFER_BYTES_PER_BYTE;
+    if (logger->binary_buffer ) {
+        free(logger->binary_buffer);
+        logger->binary_buffer = NULL;
+    }
+    logger->binary_buffer = malloc(logger->binary_buffer_size);
+}
+
+void logc_log_binary(struct logc *logger, LOGC_LOG_LEVEL level, const char *data, size_t data_size, const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    logc_vlog_binary(logger, level, data, data_size, fmt, ap);
+    va_end(ap);
+}
+
+void logc_vlog_binary(struct logc *logger, LOGC_LOG_LEVEL level, const char *data, size_t data_size, const char *fmt, va_list ap) {
+    struct iovec *vec;
+    int vec_count = 0;
     struct timeval tv;
     formatter_result_t result;
     ssize_t written;
+
+    formatter_result_t binary_result = {NULL, 0};
+
+    if ( data && data_size > 0 ) {
+        // log binary data
+        vec_count = BUFFER_COUNT + 2;
+    } else {
+        vec_count = BUFFER_COUNT + 1;
+    }
+
+    vec  = (struct iovec *)alloca(sizeof(struct iovec) * vec_count);
 
     CHECK_POINTER(logger);
 
@@ -203,16 +339,18 @@ void logc_vlog(struct logc *logger, LOGC_LOG_LEVEL level, const char *fmt, va_li
     vec[4].iov_base = "\n";
     vec[4].iov_len = 1;
 
-    written  = writev(logger->fd, vec, sizeof(vec)/sizeof(struct iovec));
+    if ( data && data_size > 0 ) {
+        // log binary data
+        binary_result = logger->binary_formatter(logger->binary_maxsize, data, data_size, logger->binary_buffer, logger->binary_buffer_size);
+        vec[5].iov_base = binary_result.buffer;
+        vec[5].iov_len = binary_result.buffer_size;
+    }
+
+    written  = writev(logger->fd, vec, vec_count);
     logger->total += written;
 
     if (logger->rotate_size && logger->rotate_count && logger->total > logger->rotate_size) {
         _do_rotate(logger);
     }
-}
-
-void logc_set_rotate(struct logc *logger, int rotate_count, ssize_t rotate_size) {
-    logger->rotate_count = rotate_count;
-    logger->rotate_size = rotate_size;
 }
 
