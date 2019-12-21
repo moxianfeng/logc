@@ -3,7 +3,7 @@
 
 AC_PREREQ([2.69])
 AC_INIT([FULL-PACKAGE-NAME], [VERSION], [BUG-REPORT-ADDRESS])
-AM_INIT_AUTOMAKE #1
+AM_INIT_AUTOMAKE ([foreign])
 AC_CONFIG_SRCDIR([logc.c])
 AC_CONFIG_HEADERS([config.h])
 
@@ -40,4 +40,6 @@ AC_PROG_CC
 
 # Checks for library functions.
 
-AC_OUTPUT(Makefile)
+AC_CONFIG_FILES([Makefile test/Makefile])
+
+AC_OUTPUT

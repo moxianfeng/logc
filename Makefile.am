@@ -5,7 +5,7 @@ liblogc_la_CFLAGS=${CFLAGS} -DBINARY_COLS=${BINARY_COLS}
 include_HEADERS=logc.h
 ACLOCAL_AMFLAGS=-I m4
 
-check_PROGRAMS=liblogc_test
-liblogc_test_SOURCES=liblogc_test.c
-liblogc_test_LDADD=$(top_builddir)/liblogc.la
-liblogc_test_LDFLAGS=-static
+#check_PROGRAMS=liblogc_test
+#liblogc_test_SOURCES=test_test.c
+#liblogc_test_LDADD=$(top_builddir)/liblogc.la
+#liblogc_test_LDFLAGS=-static

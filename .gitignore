@@ -78,4 +78,4 @@ config.sub
 libtool
 ltmain.sh
 m4/*
-liblogc_test
+test/test

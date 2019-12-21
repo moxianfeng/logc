@@ -1,0 +1,15 @@
+# 1. BUILDING AND INSTALLATION
+
+## Autoconf
+
+```
+$ ./autogen.sh
+$ ./configure
+$ make
+$ sudo make install
+```
+
+# 2. Example
+
+See test directory
+
