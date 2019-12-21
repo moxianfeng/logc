@@ -62,6 +62,7 @@ void logc_set_level_formatter(struct logc *logger, level_formatter_t formatter);
  * and default one byte buffer size is defined by macro BINARY_BYTES_PER_BYTE(16), you can change it by recompile logc library
  **/
 void logc_set_binary_maxsize(struct logc *logger, size_t siz);
+void lgoc_set_level(struct logc *logger, LOGC_LOG_LEVEL level);
 
 void logc_log(struct logc *logger, LOGC_LOG_LEVEL level, const char *fmt, ...);
 void logc_vlog(struct logc *logger, LOGC_LOG_LEVEL level, const char *fmt, va_list ap);

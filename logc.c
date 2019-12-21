@@ -287,6 +287,10 @@ void logc_set_binary_maxsize(struct logc *logger, size_t siz) {
     logger->binary_buffer = malloc(logger->binary_buffer_size);
 }
 
+void lgoc_set_level(struct logc *logger, LOGC_LOG_LEVEL level) {
+    logger->level = level;
+}
+
 void logc_binary(struct logc *logger, LOGC_LOG_LEVEL level, const char *data, size_t data_size, const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);

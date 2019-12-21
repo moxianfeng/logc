@@ -28,6 +28,7 @@ main()
         return -1;
     }
     logc_set_rotate(logger, 10, 5000);
+    lgoc_set_level(logger, LOG_INFO);
 
     for ( i = 0;i < 100;i++ ) {
         logc_error(logger, "%04d, lksjfldsfj", i);
