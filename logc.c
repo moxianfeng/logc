@@ -28,9 +28,9 @@
 #define BINARY_BUFFER_BYTES_PER_BYTE 16
 #endif // BINARY_BUFFER_BYTES_PER_BYTE
 
-#ifndef BINARY_BYTES_PER_LINE
-#define BINARY_BYTES_PER_LINE 32
-#endif // BINARY_BYTES_PER_LINE
+#ifndef BINARY_COLS
+#define BINARY_COLS 32
+#endif // BINARY_COLS
 
 
 const char *_LEVEL_STRING [4] = {
@@ -94,7 +94,7 @@ int _default_binary_format_line(size_t lineno, const char *data, size_t data_siz
     int offset = 0;
 
     // `0000 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16  ................\n`
-    size_t line_size = 4 + 3 * BINARY_BYTES_PER_LINE + 2 + BINARY_BYTES_PER_LINE + 1;
+    size_t line_size = 4 + 3 * BINARY_COLS + 2 + BINARY_COLS + 1;
 
     // is the buffer enough for one line
     if ( buffer_size - offset < line_size ) {
@@ -105,21 +105,21 @@ int _default_binary_format_line(size_t lineno, const char *data, size_t data_siz
     ret = snprintf(buffer + offset, buffer_size - offset, "%04lu", lineno);
     offset += ret;
 
-    for ( i = 0;i < BINARY_BYTES_PER_LINE;i++ ) {
+    for ( i = 0;i < BINARY_COLS;i++ ) {
         unsigned char c = *(unsigned char *)(data + i);
         ret = snprintf(buffer + offset, buffer_size - offset, " %02x", c);
         offset += ret;
 
         if ( c >= 32 && c <= 126 ) {
-            buffer[4 + 3 * BINARY_BYTES_PER_LINE + 2 + i] = c;
+            buffer[4 + 3 * BINARY_COLS + 2 + i] = c;
         } else {
-            buffer[4 + 3 * BINARY_BYTES_PER_LINE + 2 + i] = '.';
+            buffer[4 + 3 * BINARY_COLS + 2 + i] = '.';
         }
     }
     // `0000 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16  ................\n`
     //                                                      ^^
-    buffer[4 + 3 * BINARY_BYTES_PER_LINE] = ' ';
-    buffer[4 + 3 * BINARY_BYTES_PER_LINE + 1] = ' ';
+    buffer[4 + 3 * BINARY_COLS] = ' ';
+    buffer[4 + 3 * BINARY_COLS + 1] = ' ';
     buffer[line_size - 1] = '\n';
     return line_size;
 }
@@ -130,7 +130,7 @@ formatter_result_t _default_binary_formmater(size_t max_print_size, const char *
     formatter_result_t result = {buffer, 0};
 
     // `     01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16\n`
-    size_t head_size = 4 + 3 * BINARY_BYTES_PER_LINE + 1;
+    size_t head_size = 4 + 3 * BINARY_COLS + 1;
 
     if ( buffer_size - buffer_offset < head_size ) {
         goto final_return;
@@ -140,15 +140,15 @@ formatter_result_t _default_binary_formmater(size_t max_print_size, const char *
     ret = snprintf(buffer + buffer_offset, buffer_size - buffer_offset, "%4s", " ");
     buffer_offset += ret;
 
-    for ( i = 0;i < BINARY_BYTES_PER_LINE;i++ ) {
+    for ( i = 0;i < BINARY_COLS;i++ ) {
         ret = snprintf(buffer + buffer_offset, buffer_size - buffer_offset, " %02lu", i);
         buffer_offset += ret;
     }
     *(buffer + buffer_offset) = '\n';
     buffer_offset += 1;
 
-    for ( i = 0;i < data_size && i < max_print_size;i+=BINARY_BYTES_PER_LINE ) {
-        ret = _default_binary_format_line(i/BINARY_BYTES_PER_LINE, data + i, data_size - i, buffer + buffer_offset, buffer_size - buffer_offset);
+    for ( i = 0;i < data_size && i < max_print_size;i+=BINARY_COLS ) {
+        ret = _default_binary_format_line(i/BINARY_COLS, data + i, data_size - i, buffer + buffer_offset, buffer_size - buffer_offset);
         if ( ret == 0 ) {
             // buffer not enough
             break;

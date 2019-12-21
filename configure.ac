@@ -11,6 +11,22 @@ AC_PROG_LIBTOOL
 
 AC_PROG_LIBTOOL
 
+#AC_ARG_ENABLE(
+#[CFLAGS="${CFLAGS} -DBINARY_BYTES_PER_LINE=${enableval}"],
+#AC_ARG(linebytes, 
+#    AS_HELP_STRING([--linebytes], [Binary log bytes per line [32]]),
+#    CFLAGS="${CFLAGS} -DBINARY_BYTES_PER_LINE=${withval}",
+#    CFLAGS="${CFLAGS} -DBINARY_BYTES_PER_LINE=",
+#)
+#AC_ARG_VAR(["--linebytes"], 
+#    AS_HELP_STRING([--linebytes], [Binary log bytes per line [32]])
+#)
+
+AC_ARG_VAR(BINARY_COLS, [how many byes be formmated in one line for log binary])
+
+#CFLAGS="${CFLAGS} -DBINARY_COLS=32"
+#AC_SUBST([CFLAGS])
+
 # Checks for programs.
 AC_PROG_CC
 
