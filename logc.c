@@ -126,7 +126,7 @@ int _default_binary_format_line(size_t lineno, const char *data, size_t data_siz
 
 formatter_result_t _default_binary_formmater(size_t max_print_size, const char *data, size_t data_size, char *buffer, size_t buffer_size) {
     size_t i, buffer_offset = 0;
-    int ret, j;
+    int ret;
     formatter_result_t result = {buffer, 0};
 
     // `     01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16\n`
