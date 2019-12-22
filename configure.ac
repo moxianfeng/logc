@@ -13,19 +13,21 @@ AC_PROG_LIBTOOL
 
 #AC_ARG_ENABLE(
 #[CFLAGS="${CFLAGS} -DBINARY_BYTES_PER_LINE=${enableval}"],
-#AC_ARG(linebytes, 
-#    AS_HELP_STRING([--linebytes], [Binary log bytes per line [32]]),
-#    CFLAGS="${CFLAGS} -DBINARY_BYTES_PER_LINE=${withval}",
-#    CFLAGS="${CFLAGS} -DBINARY_BYTES_PER_LINE=",
-#)
+AC_ARG_WITH(custom-binary-columns, 
+    AS_HELP_STRING([--with-custom-binary-columns], [how many byes be formmated in one line for log binary[32]]),
+    CFLAGS="${CFLAGS} -DBINARY_COLS=${withval}",
+    CFLAGS="${CFLAGS}",
+)
 #AC_ARG_VAR(["--linebytes"], 
 #    AS_HELP_STRING([--linebytes], [Binary log bytes per line [32]])
 #)
 
-AC_ARG_VAR(BINARY_COLS, [how many byes be formmated in one line for log binary])
-
-#CFLAGS="${CFLAGS} -DBINARY_COLS=32"
-#AC_SUBST([CFLAGS])
+#AC_ARG_VAR(BINARY_COLS, [how many byes be formmated in one line for log binary])
+#
+##CFLAGS="${CFLAGS} -DBINARY_COLS=32"
+##AC_SUBST([CFLAGS])
+#
+#AM_CONDITIONAL(BINARY_COLS, test BINARY_COLS)
 
 # Checks for programs.
 AC_PROG_CC
@@ -40,6 +42,6 @@ AC_PROG_CC
 
 # Checks for library functions.
 
-AC_CONFIG_FILES([Makefile test/Makefile])
+AC_CONFIG_FILES([Makefile example/Makefile])
 
 AC_OUTPUT

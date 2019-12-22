@@ -1,6 +1,5 @@
 lib_LTLIBRARIES=liblogc.la
 liblogc_la_SOURCES=logc.h logc.c
-liblogc_la_CFLAGS=${CFLAGS} -DBINARY_COLS=${BINARY_COLS}
 #liblogc_la_LDFLAGS=-shared -fpic
 include_HEADERS=logc.h
 ACLOCAL_AMFLAGS=-I m4
